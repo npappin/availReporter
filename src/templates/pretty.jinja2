@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Availability</title>
+  <style>
+    .accordion {
+      background-color: #eee;
+      color: #444;
+      cursor: pointer;
+      padding: 14px 18px;
+      width: 100%;
+      text-align: left;
+      border: none;
+      outline: none;
+      transition: background-color 0.2s ease;
+      margin-bottom: 2px;
+      color: #000;
+    }
+    .accordion:hover,
+    .accordion.active {
+      background-color: #ccc;
+    }
+    .panel {
+      padding: 0 18px;
+      background-color: white;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease-out;
+    }
+    .record-table {
+      width: auto;
+      max-width: max-content;
+      display: inline-table;
+      border-collapse: collapse;
+      margin: 12px 0;
+      color: #000;
+    }
+    .record-table th,
+    .record-table td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+      color: #000;
+      white-space: nowrap;
+    }
+    .record-table th {
+      background-color: #fff;
+      font-weight: bold;
+    }
+    .record-table tbody tr:nth-child(even) {
+      background-color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div id="availability-accordion">
+    {% for key, records in data.items() %}
+      <button class="accordion">{{ key }}</button>
+      <div class="panel">
+        {% if records %}
+        {% set headers = ["brand_name", "tech_name", "max_down", "max_up"] %}
+        <table class="record-table">
+          <thead>
+            <tr>
+              {% for field in headers %}
+              <th>{{ field }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+          {% for record in records %}
+            <tr>
+              {% for field in headers %}
+              <td>{{ record[field] }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p>No records available.</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    document.querySelectorAll("#availability-accordion .accordion").forEach(button => {
+      button.addEventListener("click", () => {
+        button.classList.toggle("active");
+        const panel = button.nextElementSibling;
+        if (panel.style.maxHeight) {
+          panel.style.maxHeight = null;
+        } else {
+          panel.style.maxHeight = panel.scrollHeight + "px";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

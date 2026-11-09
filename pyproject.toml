@@ -1,0 +1,20 @@
+[project]
+name = "availReporter"
+version = "0.1.0"
+description = "FastAPI todo backend conforming to the todobackend.com spec"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]",
+    "jinja2",
+    "duckdb",
+    "numpy>=2.5.4",
+    "pandas>=3.1.1",
+    "python-dotenv>=1.2.4",
+]
+
+[dependency-groups]
+dev = [
+    "workers-py",
+    "workers-runtime-sdk"
+]
