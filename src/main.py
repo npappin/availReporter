@@ -4,7 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 # from jinja2 import Template
-from functools import lru_cache
 
 import duckdb, pathlib, datetime, os
 from dotenv import load_dotenv
@@ -76,7 +75,6 @@ async def root():
     return {"message": "Hello World"}
 
 
-@lru_cache(maxsize=100)
 @app.get("/availability", response_class=JSONResponse)
 async def get_availability(location_id: str):
     before = datetime.datetime.now()
@@ -88,7 +86,6 @@ async def get_availability(location_id: str):
     return result.to_dict(orient="records")
 
 
-@lru_cache(maxsize=100)
 @app.get("/pretty", response_class=HTMLResponse)
 async def get_pretty_availability(request: Request, location_id: str):
     before = datetime.datetime.now()
