@@ -18,8 +18,8 @@ CLOUDFLARE_BUCKET = os.environ.get("CLOUDFLARE_BUCKET")
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
+templates = Jinja2Templates(directory="src/templates")
 
 try:
     db = duckdb.connect(":memory:")

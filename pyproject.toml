@@ -18,3 +18,5 @@ dev = [
     "workers-py",
     "workers-runtime-sdk"
 ]
+[tool.fastapi]
+entrypoint = "src.main:app"
