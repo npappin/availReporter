@@ -15,7 +15,12 @@ CLOUDFLARE_SECRET = os.environ.get("CLOUDFLARE_SECRET")
 CLOUDFLARE_ACCOUNT_ID = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
 CLOUDFLARE_BUCKET = os.environ.get("CLOUDFLARE_BUCKET")
 
-app = FastAPI()
+app = FastAPI(
+    title="availReporter",
+    description="Broadband availability lookup by location ID",
+    docs_url="/",
+    redoc_url=None
+)
 
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
 templates = Jinja2Templates(directory="src/templates")
@@ -70,9 +75,9 @@ async def favicon():
     return FileResponse("src/static/favicon.ico")
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+# @app.get("/")
+# async def root():
+#     return {"message": "Hello World"}
 
 
 @app.get("/availability", response_class=JSONResponse)
