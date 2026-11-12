@@ -229,3 +229,6 @@ node_modules
 wrangler.jsonc
 package-lock.json
 package.json
+
+# VScode
+.vscode
