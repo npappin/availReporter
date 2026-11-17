@@ -232,3 +232,4 @@ package.json
 
 # VScode
 .vscode
+debug/*
