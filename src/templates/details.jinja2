@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Availability</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+  <style>
+    .search {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .search input {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 10px 12px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .search button {
+      padding: 10px 18px;
+      font-size: 1em;
+      border: none;
+      border-radius: 6px;
+      background-color: #444;
+      color: #fff;
+      cursor: pointer;
+    }
+    .search button:hover {
+      background-color: #222;
+    }
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .card {
+      flex: 1 1 180px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 14px 18px;
+      background-color: #fafafa;
+      color: #000;
+    }
+    .card-label {
+      font-size: 0.85em;
+      color: #555;
+      margin-bottom: 4px;
+    }
+    .card-value {
+      font-size: 1.4em;
+      font-weight: bold;
+    }
+    .accordion {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #eee;
+      cursor: pointer;
+      padding: 14px 18px;
+      width: 100%;
+      text-align: left;
+      border: none;
+      outline: none;
+      transition: background-color 0.2s ease;
+      margin-bottom: 2px;
+      color: #000;
+    }
+    .accordion:hover,
+    .accordion.active {
+      background-color: #ccc;
+    }
+    .status {
+      font-size: 0.85em;
+      font-weight: bold;
+      padding: 2px 10px;
+      border-radius: 10px;
+      color: #fff;
+    }
+    .status.served {
+      background-color: #2e7d32;
+    }
+    .status.unserved {
+      background-color: #c62828;
+    }
+    .panel {
+      padding: 0 18px;
+      background-color: white;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease-out;
+    }
+    .record-table {
+      width: auto;
+      max-width: max-content;
+      display: inline-table;
+      border-collapse: collapse;
+      margin: 12px 0;
+      color: #000;
+    }
+    .record-table th,
+    .record-table td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+      color: #000;
+      white-space: nowrap;
+    }
+    .record-table th {
+      background-color: #fff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <form class="search" action="/details" method="get">
+    <input
+      type="search"
+      name="location_id"
+      placeholder="Location ID"
+      aria-label="Location ID"
+      value="{{ request.query_params.get('location_id', '') }}"
+      required
+    />
+    <button type="submit">Search</button>
+  </form>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-label">Earliest release</div>
+      <div class="card-value">{{ stats.earliest }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Latest release</div>
+      <div class="card-value">{{ stats.latest }}</div>
+    </div>
+  </div>
+
+  <div id="availability-accordion">
+    {% for key, records in data.items() %}
+      {% set served = records and stats.get("status_" ~ records[0].release) %}
+      <button class="accordion">
+        <span>{{ key }}</span>
+        {% if served %}
+        <span class="status served">Served</span>
+        {% else %}
+        <span class="status unserved">Unserved</span>
+        {% endif %}
+      </button>
+      <div class="panel">
+        {% if records %}
+        {% set headers = ["brand_name", "tech_name", "max_down", "max_up"] %}
+        <table class="record-table">
+          <thead>
+            <tr>
+              {% for field in headers %}
+              <th>{{ field }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+          {% for record in records %}
+            <tr>
+              {% for field in headers %}
+              <td>{{ record[field] }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p>No records available.</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    document.querySelectorAll("#availability-accordion .accordion").forEach(button => {
+      button.addEventListener("click", () => {
+        button.classList.toggle("active");
+        const panel = button.nextElementSibling;
+        if (panel.style.maxHeight) {
+          panel.style.maxHeight = null;
+        } else {
+          panel.style.maxHeight = panel.scrollHeight + "px";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

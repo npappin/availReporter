@@ -86,7 +86,7 @@ async def favicon():
 async def get_availability(location_id: str):
     before = datetime.datetime.now()
     result = db.execute(
-        f"SELECT * FROM avail WHERE location_id = '{location_id}'"
+        "SELECT * FROM avail WHERE location_id = ?", [location_id]
     ).fetchdf()
     after = datetime.datetime.now()
     print(f"Query time: {after - before}")
@@ -97,7 +97,7 @@ async def get_availability(location_id: str):
 async def get_pretty_availability(request: Request, location_id: str):
     before = datetime.datetime.now()
     result = db.execute(
-        f"SELECT * FROM avail WHERE location_id = '{location_id}'"
+        "SELECT * FROM avail WHERE location_id = ?", [location_id]
     ).fetchdf()
     after = datetime.datetime.now()
     print(f"Query time: {after - before}")
@@ -111,4 +111,40 @@ async def get_pretty_availability(request: Request, location_id: str):
     # return result[['brand_name', 'max_down', 'max_up']].to_html()
     return templates.TemplateResponse(
         request=request, name="pretty.jinja2", context={"data": data}
+    )
+
+
+@app.get("/details", response_class=HTMLResponse, include_in_schema=False)
+async def get_detailed_availability(request: Request, location_id:str):
+    before = datetime.datetime.now()
+    result = db.execute(
+            "SELECT * FROM avail WHERE location_id = ?", [location_id]
+        ).fetchdf()
+    after = datetime.datetime.now()
+    print(f"Query time: {after - before}")
+    stats = dict()
+    data = dict()
+    stats['earliest'] = result.release.min()
+    stats['latest'] = result.release.max()
+    result["tech_name"] = result["technology"].map(techName)
+    result["version"] = result["release"].map(versionMap)
+    result["verRel"] = result["version"] + " - (" + result["release"] + ")"
+    
+    for release in result.verRel.drop_duplicates().to_list():
+        data[release] = result[result.verRel == release].to_dict(orient="records")
+    
+    for release in result.release.drop_duplicates().to_list():
+        # print(release)
+        df = result[result.release == release]
+        # print(df[['brand_name', 'max_down', 'max_up', 'technology']])
+        # print(df[(df.max_down >=100) & (df.max_up >= 20) & (df.technology.isin([40, 50, 71]))].shape[0])
+        servedOfferings = df[(df.max_down >=100) & (df.max_up >= 20) & (df.technology.isin([40, 50, 71]))]
+        # print(servedOfferings.shape)
+        if servedOfferings.shape[0] > 0:
+            stats[f'status_{release}'] = True
+        else:
+            stats[f'status_{release}'] = False
+    
+    return templates.TemplateResponse(
+        request=request, name="details.jinja2", context={"data": data, "stats": stats}
     )
